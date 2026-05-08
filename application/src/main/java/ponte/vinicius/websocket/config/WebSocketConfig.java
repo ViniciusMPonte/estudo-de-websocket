@@ -1,4 +1,4 @@
-package ponte.vinicius.websocket;
+package ponte.vinicius.websocket.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

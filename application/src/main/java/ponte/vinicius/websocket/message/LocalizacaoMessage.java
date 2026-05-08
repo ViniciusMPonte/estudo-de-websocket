@@ -1,12 +1,13 @@
-package ponte.vinicius.websocket;
+package ponte.vinicius.websocket.message;
 
-public class LocalizacaoMessage {
+public class LocalizacaoMessage extends SalaMessage {
     private double latitude;
     private double longitude;
 
     public LocalizacaoMessage() {}
 
-    public LocalizacaoMessage(double latitude, double longitude) {
+    public LocalizacaoMessage(String chave, double latitude, double longitude) {
+        super(chave);
         this.latitude = latitude;
         this.longitude = longitude;
     }
