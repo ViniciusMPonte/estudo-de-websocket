@@ -33,7 +33,7 @@
     }
 
     function conectar() {
-        var socket = new SockJS('http://localhost:8080/chat');
+        var socket = new SockJS('https://estudo-de-websocket.onrender.com/aquito');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function(frame) {
             log('Conectado: ' + frame);
