@@ -7,8 +7,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import ponte.vinicius.websocket.message.EntrarMessage;
 import ponte.vinicius.websocket.message.LocalizacaoMessage;
-import ponte.vinicius.websocket.sala.SalaManager;
 import ponte.vinicius.websocket.message.SalaMessage;
+import ponte.vinicius.websocket.sala.SalaManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +25,7 @@ public class LocalizacaoController {
     @MessageMapping("/entrar")
     public void entrarNaSala(EntrarMessage message, SimpMessageHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
-        salaManager.entrar(message.getChave(), sessionId, message.getApelido());
+        salaManager.entrar(message.getChave(), sessionId, message.getApelido(), message.getUuid());
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("evento", "ENTROU");
@@ -47,7 +47,12 @@ public class LocalizacaoController {
         payload.put("latitude", message.getLatitude());
         payload.put("longitude", message.getLongitude());
 
-        messagingTemplate.convertAndSend("/topic/sala/" + message.getChave(), (Object) payload);
+        salaManager.getUuidsMembrosExceto(sala, sessionId).forEach(uuid ->
+                messagingTemplate.convertAndSend(
+                        "/topic/sala/" + sala + "/" + uuid,
+                        (Object) payload
+                )
+        );
     }
 
     @MessageMapping("/sair")
