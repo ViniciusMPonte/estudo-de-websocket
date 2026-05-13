@@ -25,11 +25,10 @@ public class LocalizacaoController {
     @MessageMapping("/entrar")
     public void entrarNaSala(EntrarMessage message, SimpMessageHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
-        salaManager.entrar(message.getChave(), sessionId, message.getApelido(), message.getUuid());
+        salaManager.entrar(message.getChave(), sessionId, message.getUuid());
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("evento", "ENTROU");
-        payload.put("apelido", message.getApelido());
 
         messagingTemplate.convertAndSend("/topic/sala/" + message.getChave(), (Object) payload);
     }
@@ -55,13 +54,15 @@ public class LocalizacaoController {
     @MessageMapping("/sair")
     public void sairDaSala(SalaMessage message, SimpMessageHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
-        String apelido = salaManager.getApelido(sessionId);
+        String uuidServidor = salaManager.getUuid(sessionId);
 
         salaManager.sair(sessionId);
 
+        if (uuidServidor == null || !uuidServidor.equals(message.getUuid())) return;
+
         Map<String, Object> payload = new HashMap<>();
         payload.put("evento", "SAIU");
-        payload.put("apelido", apelido);
+        payload.put("uuid", uuidServidor);
 
         messagingTemplate.convertAndSend("/topic/sala/" + message.getChave(), (Object) payload);
     }

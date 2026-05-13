@@ -12,13 +12,11 @@ public class SalaManager {
 
     private final Map<String, Set<String>> salas = new ConcurrentHashMap<>();
     private final Map<String, String> sessaoPorSala = new ConcurrentHashMap<>();
-    private final Map<String, String> apelidoPorSessao = new ConcurrentHashMap<>();
     private final Map<String, String> uuidPorSessao = new ConcurrentHashMap<>();
 
-    public void entrar(String chave, String sessionId, String apelido, String uuid) {
+    public void entrar(String chave, String sessionId, String uuid) {
         salas.computeIfAbsent(chave, k -> ConcurrentHashMap.newKeySet()).add(sessionId);
         sessaoPorSala.put(sessionId, chave);
-        apelidoPorSessao.put(sessionId, apelido);
         uuidPorSessao.put(sessionId, uuid);
     }
 
@@ -31,16 +29,11 @@ public class SalaManager {
                 if (membros.isEmpty()) salas.remove(chave);
             }
         }
-        apelidoPorSessao.remove(sessionId);
         uuidPorSessao.remove(sessionId);
     }
 
     public String getSalaDoCliente(String sessionId) {
         return sessaoPorSala.get(sessionId);
-    }
-
-    public String getApelido(String sessionId) {
-        return apelidoPorSessao.getOrDefault(sessionId, sessionId);
     }
 
     public String getUuid(String sessionId) {

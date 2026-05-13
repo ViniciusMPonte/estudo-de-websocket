@@ -8,7 +8,6 @@
 <body>
 <h2>Teste WebSocket STOMP</h2>
 
-<input id="apelido" placeholder="Apelido" />
 <input id="chave" placeholder="Chave da sala" />
 <button onclick="conectar()">Conectar</button>
 <button onclick="entrar()">Entrar na sala</button>
@@ -36,10 +35,6 @@
         return document.getElementById('chave').value;
     }
 
-    function getApelido() {
-        return document.getElementById('apelido').value;
-    }
-
     function conectar() {
         var socket = new SockJS('http://localhost:8080/aquito');
         stompClient = Stomp.over(socket);
@@ -62,9 +57,9 @@
             log('[sala] ' + msg.body);
         });
 
-        var payload = JSON.stringify({ chave: chave, apelido: getApelido(), uuid: meuUuid });
+        var payload = JSON.stringify({ chave: chave, uuid: meuUuid });
         stompClient.send('/app/entrar', {}, payload);
-        log('Entrou na sala: ' + chave + ' como ' + getApelido() + ' | uuid: ' + meuUuid);
+        log('Entrou na sala: ' + chave + ' | uuid: ' + meuUuid);
     }
 
     function enviarLocalizacao() {
