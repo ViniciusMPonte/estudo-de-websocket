@@ -19,6 +19,14 @@
 
 <script>
     var stompClient;
+    var meuUuid = gerarUuid();
+
+    function gerarUuid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0;
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+    }
 
     function log(msg) {
         document.getElementById('log').textContent += msg + '\n';
@@ -33,37 +41,46 @@
     }
 
     function conectar() {
-        var socket = new SockJS('http://localhost:8080/chat');
+        var socket = new SockJS('http://localhost:8080/aquito');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function(frame) {
-            log('Conectado: ' + frame);
+            log('Conectado | uuid: ' + meuUuid);
         });
     }
 
     function entrar() {
         var chave = getChave();
-        var payload = JSON.stringify({ chave: chave, apelido: getApelido() });
-        stompClient.send('/app/entrar', {}, payload);
-        log('Entrou na sala: ' + chave);
 
         stompClient.subscribe('/topic/sala/' + chave, function(msg) {
-            log('Recebido: ' + msg.body);
+            var payload = JSON.parse(msg.body);
+
+            if (payload.evento === 'LOCALIZACAO' && payload.uuid === meuUuid) {
+                log('[sala] (ignorado — própria localização) ' + msg.body);
+                return;
+            }
+
+            log('[sala] ' + msg.body);
         });
+
+        var payload = JSON.stringify({ chave: chave, apelido: getApelido(), uuid: meuUuid });
+        stompClient.send('/app/entrar', {}, payload);
+        log('Entrou na sala: ' + chave + ' como ' + getApelido() + ' | uuid: ' + meuUuid);
     }
 
     function enviarLocalizacao() {
         var payload = JSON.stringify({
             chave: getChave(),
+            uuid: meuUuid,
             latitude: -23.5505,
             longitude: -46.6333
         });
         stompClient.send('/app/localizacao', {}, payload);
-        log('Localização enviada: ' + payload);
+        log('Localização enviada');
     }
 
     function sair() {
         var chave = getChave();
-        var payload = JSON.stringify({ chave: chave });
+        var payload = JSON.stringify({ chave: chave, uuid: meuUuid });
         stompClient.send('/app/sair', {}, payload);
         log('Saiu da sala: ' + chave);
     }

@@ -6,8 +6,8 @@ public class LocalizacaoMessage extends SalaMessage {
 
     public LocalizacaoMessage() {}
 
-    public LocalizacaoMessage(String chave, double latitude, double longitude) {
-        super(chave);
+    public LocalizacaoMessage(String uuid, String chave, double latitude, double longitude) {
+        super(uuid, chave);
         this.latitude = latitude;
         this.longitude = longitude;
     }

@@ -38,21 +38,18 @@ public class LocalizacaoController {
     public void enviarLocalizacao(LocalizacaoMessage message, SimpMessageHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
         String sala = salaManager.getSalaDoCliente(sessionId);
+        String uuidServidor = salaManager.getUuid(sessionId);
 
         if (sala == null || !sala.equals(message.getChave())) return;
+        if (uuidServidor == null || !uuidServidor.equals(message.getUuid())) return;
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("evento", "LOCALIZACAO");
-        payload.put("apelido", salaManager.getApelido(sessionId));
+        payload.put("uuid", uuidServidor);
         payload.put("latitude", message.getLatitude());
         payload.put("longitude", message.getLongitude());
 
-        salaManager.getUuidsMembrosExceto(sala, sessionId).forEach(uuid ->
-                messagingTemplate.convertAndSend(
-                        "/topic/sala/" + sala + "/" + uuid,
-                        (Object) payload
-                )
-        );
+        messagingTemplate.convertAndSend("/topic/sala/" + sala, (Object) payload);
     }
 
     @MessageMapping("/sair")

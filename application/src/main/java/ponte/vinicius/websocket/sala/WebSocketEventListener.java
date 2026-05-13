@@ -22,16 +22,16 @@ public class WebSocketEventListener {
     public void handleDisconnect(SessionDisconnectEvent event) {
         String sessionId = event.getSessionId();
         String chave = salaManager.getSalaDoCliente(sessionId);
-        String apelido = salaManager.getApelido(sessionId);
+        String uuid = salaManager.getUuid(sessionId);
 
         salaManager.sair(sessionId);
 
-        if (chave != null) {
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("evento", "SAIU");
-            payload.put("apelido", apelido);
+        if (chave == null || uuid == null) return;
 
-            messagingTemplate.convertAndSend("/topic/sala/" + chave, (Object) payload);
-        }
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("evento", "SAIU");
+        payload.put("uuid", uuid);
+
+        messagingTemplate.convertAndSend("/topic/sala/" + chave, (Object) payload);
     }
 }

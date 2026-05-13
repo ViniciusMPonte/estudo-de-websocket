@@ -41,7 +41,7 @@
     }
 
     function conectar() {
-        var socket = new SockJS('https://estudo-de-websocket.onrender.com/aquito');
+        var socket = new SockJS('http://localhost:8080/aquito');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function(frame) {
             log('Conectado | uuid: ' + meuUuid);
@@ -51,24 +51,26 @@
     function entrar() {
         var chave = getChave();
 
-        // tópico da sala: eventos (ENTROU, SAIU)
         stompClient.subscribe('/topic/sala/' + chave, function(msg) {
-            log('[sala] ' + msg.body);
-        });
+            var payload = JSON.parse(msg.body);
 
-        // tópico pessoal: localizações recebidas
-        stompClient.subscribe('/topic/sala/' + chave + '/' + meuUuid, function(msg) {
-            log('[pessoal] ' + msg.body);
+            if (payload.evento === 'LOCALIZACAO' && payload.uuid === meuUuid) {
+                log('[sala] (ignorado — própria localização) ' + msg.body);
+                return;
+            }
+
+            log('[sala] ' + msg.body);
         });
 
         var payload = JSON.stringify({ chave: chave, apelido: getApelido(), uuid: meuUuid });
         stompClient.send('/app/entrar', {}, payload);
-        log('Entrou na sala: ' + chave + ' como ' + getApelido());
+        log('Entrou na sala: ' + chave + ' como ' + getApelido() + ' | uuid: ' + meuUuid);
     }
 
     function enviarLocalizacao() {
         var payload = JSON.stringify({
             chave: getChave(),
+            uuid: meuUuid,
             latitude: -23.5505,
             longitude: -46.6333
         });
@@ -78,7 +80,7 @@
 
     function sair() {
         var chave = getChave();
-        var payload = JSON.stringify({ chave: chave });
+        var payload = JSON.stringify({ chave: chave, uuid: meuUuid });
         stompClient.send('/app/sair', {}, payload);
         log('Saiu da sala: ' + chave);
     }
